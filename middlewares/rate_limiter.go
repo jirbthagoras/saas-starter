@@ -15,7 +15,7 @@ var ctx = context.Background()
 func RateLimiterMiddleware(rdb *redis.Client, maxRequest int, window time.Duration) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// Getting the stuffs
-		key := c.Get("X-RATE-LIMITER")
+		key := c.IP()
 
 		// Calling the rate limiter
 		allow, count, err := utils.AllowRequest(rdb, key, maxRequest, window)

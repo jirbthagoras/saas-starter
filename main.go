@@ -9,20 +9,22 @@ import (
 )
 
 func main() {
-	// Initialize Fiber app
+	//Initialize Fiber app
 	app := fiber.New(fiber.Config{
 		ErrorHandler: exceptions.ErrorHandler,
 	})
 	api := app.Group("/api/v1")
 	rdb := utils.NewRedisClient()
 
-	// Apply some Middlewares
+	//Apply some Middlewares
 	api.Use(middlewares.RateLimiterMiddleware(rdb, 10, 60*time.Second))
 
-	// Create basic path
+	//Create basic path
 	api.Get("/", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
 			"message": "Hello World",
 		})
 	})
+
+	app.Listen(":3000")
 }
