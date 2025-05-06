@@ -6,7 +6,7 @@ import (
 	"log/slog"
 )
 
-func NewRedisClient() *redis.Cl	ient {
+func NewRedisClient() *redis.Client {
 	// Create new Redis Client
 	client := redis.NewClient(&redis.Options{
 		Addr: "localhost:6379",
