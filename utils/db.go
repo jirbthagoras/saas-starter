@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 	"log/slog"
@@ -20,6 +21,16 @@ func GetConnection() *sql.DB {
 		slog.Error(err.Error())
 		os.Exit(1)
 	}
+
+	db.ExecContext(context.Background(),
+		`
+CREATE TABLE IF NOT EXISTS keys (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    token VARCHAR(255) NOT NULL,
+    expires DATETIME NOT NULL,
+)
+`,
+	)
 
 	db.SetMaxIdleConns(10)
 	db.SetMaxOpenConns(100)

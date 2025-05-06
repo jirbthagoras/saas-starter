@@ -1,4 +1,4 @@
-package main
+package middlewares
 
 import (
 	"context"
@@ -15,17 +15,17 @@ var ctx = context.Background()
 func RateLimiterMiddleware(rdb *redis.Client, maxRequest int, window time.Duration) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// Getting the stuffs
-		key := c.Get("Authorization")
+		key := c.Get("X-RATE-LIMITER")
 
 		// Calling the rate limiter
-		allow, count, err := utils.AllowRequest(rdb, key, 5, 60*time.Second)
+		allow, count, err := utils.AllowRequest(rdb, key, maxRequest, window)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, "Internal Server Error")
 		}
 
 		// Checks the result
 		if !allow {
-			slog.Info("Request Blocked yahahah")
+			slog.Info("Request Blocked")
 			return fiber.NewError(fiber.StatusUnauthorized, "Try again")
 		}
 

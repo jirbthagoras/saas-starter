@@ -3,6 +3,9 @@ package main
 import (
 	"github.com/gofiber/fiber/v2"
 	"jirbthagoras/saas-starter/exceptions"
+	"jirbthagoras/saas-starter/middlewares"
+	"jirbthagoras/saas-starter/utils"
+	"time"
 )
 
 func main() {
@@ -11,6 +14,10 @@ func main() {
 		ErrorHandler: exceptions.ErrorHandler,
 	})
 	api := app.Group("/api/v1")
+	rdb := utils.NewRedisClient()
+
+	// Apply some Middlewares
+	api.Use(middlewares.RateLimiterMiddleware(rdb, 10, 60*time.Second))
 
 	// Create basic path
 	api.Get("/", func(c *fiber.Ctx) error {

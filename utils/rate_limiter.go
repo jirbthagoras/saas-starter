@@ -45,5 +45,6 @@ func AllowRequest(rdb *redis.Client, apiKey string, maxRequest int, window time.
 		return false, 0, err
 	}
 
+	// Returns the results
 	return count <= int64(maxRequest), count, nil
 }
