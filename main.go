@@ -2,21 +2,14 @@ package main
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/joho/godotenv"
 	"jirbthagoras/saas-starter/exceptions"
 	"jirbthagoras/saas-starter/middlewares"
 	"jirbthagoras/saas-starter/utils"
 	"log"
-	"log/slog"
 	"time"
 )
 
 func main() {
-	// Load environment variables
-	if err := godotenv.Load(".env"); err != nil {
-		slog.Error("Error loading .env file", "err", err)
-	}
-
 	// Initialize Fiber app
 	app := fiber.New(fiber.Config{
 		ErrorHandler: exceptions.ErrorHandler,
