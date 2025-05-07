@@ -22,15 +22,22 @@ func GetConnection() *sql.DB {
 		os.Exit(1)
 	}
 
-	db.ExecContext(context.Background(),
+	_, err = db.ExecContext(context.Background(),
 		`
-CREATE TABLE IF NOT EXISTS keys (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    token VARCHAR(255) NOT NULL,
-    expires DATETIME NOT NULL,
-)
-`,
+	CREATE TABLE IF NOT EXISTS apikeys (
+		id INT AUTO_INCREMENT,
+		token VARCHAR(255) NOT NULL,
+		expires_at DATETIME NOT NULL,
+		PRIMARY KEY (id)
+	);
+			`,
 	)
+
+	if err != nil {
+		slog.Error(err.Error())
+	}
+
+	slog.Info("Init success")
 
 	db.SetMaxIdleConns(10)
 	db.SetMaxOpenConns(100)

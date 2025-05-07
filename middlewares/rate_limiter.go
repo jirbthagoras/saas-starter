@@ -25,11 +25,11 @@ func RateLimiterMiddleware(rdb *redis.Client, maxRequest int, window time.Durati
 
 		// Checks the result
 		if !allow {
-			slog.Info("Request Blocked")
-			return fiber.NewError(fiber.StatusUnauthorized, "Try again")
+			slog.Info(fmt.Sprintf("Request blocked for IP: %s", c.IP()))
+			return fiber.NewError(fiber.StatusUnauthorized, "Your request is blocked")
 		}
 
-		slog.Info(fmt.Sprintf("The key: %s, have %d requests left", key, count))
+		slog.Info(fmt.Sprintf("The key: %s, requested %d/10 times", key, count))
 		return c.Next()
 	}
 }

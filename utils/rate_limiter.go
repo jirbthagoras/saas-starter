@@ -18,7 +18,7 @@ func AllowRequest(rdb *redis.Client, apiKey string, maxRequest int, window time.
 	windowStart := now - int64(window.Seconds())
 
 	// Starts a pipeline
-	_, err := rdb.Pipelined(ctx, func(pipe redis.Pipeliner) error {
+	_, err := rdb.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
 		// Remove old timestamps
 		pipe.ZRemRangeByScore(ctx, key, "0", fmt.Sprintf("%d", windowStart))
 
@@ -27,10 +27,12 @@ func AllowRequest(rdb *redis.Client, apiKey string, maxRequest int, window time.
 			Score:  float64(now),
 			Member: now,
 		})
-		slog.Debug("Created a new timestamp")
 
 		// Set the Expire to auto cleanup
-		pipe.Expire(ctx, key, window)
+		remainingTTL := window - time.Duration(now-windowStart)*time.Second
+		if remainingTTL > 0 {
+			pipe.Expire(ctx, key, remainingTTL)
+		}
 		return nil
 	})
 
@@ -38,8 +40,10 @@ func AllowRequest(rdb *redis.Client, apiKey string, maxRequest int, window time.
 		return false, 0, err
 	}
 
+	slog.Debug("Created a new timestamp", "apiKey", apiKey, "timestamp", now)
+
 	// Checking the Sorted Sets
-	count, err := rdb.ZCount(ctx, key, fmt.Sprintf("%d", windowStart), fmt.Sprintf("%d", now)).Result()
+	count, err := rdb.ZCount(ctx, key, "-inf", "+inf").Result()
 
 	if err != nil {
 		return false, 0, err
